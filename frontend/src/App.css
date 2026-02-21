@@ -1,5 +1,20 @@
 /* Clinical palette: navy #0A2540, blue #1F4E79, gray #E5E9F0, alert #B00020 */
 
+:root {
+  --sidebar-width: 240px;
+}
+
+.app-with-sidebar {
+  min-height: 100vh;
+  background: #E5E9F0;
+}
+
+.app-main-wrap {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  transition: margin-left 200ms ease;
+}
+
 .app {
   min-height: 100vh;
   display: flex;
@@ -124,6 +139,11 @@
   padding: 8px;
   gap: 8px;
   min-height: 0;
+}
+
+.dashboard-top {
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .dashboard-main {
@@ -261,9 +281,17 @@
   min-height: 160px;
 }
 
-/* Patient status */
-.patient-status .status-content {
-  padding: 8px;
+/* Patient status — room state & confidence centered as focus */
+.patient-status .panel-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.patient-status__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .status-badge {
@@ -272,8 +300,12 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  margin-bottom: 6px;
   border-radius: 0;
+}
+
+.status-badge--small {
+  font-size: 10px;
+  padding: 2px 6px;
 }
 
 .patient-status.status-clear .status-badge {
@@ -301,11 +333,66 @@
   50% { opacity: 0.92; }
 }
 
+/* Center block — room state & confidence as main focus */
+.patient-status__center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 16px;
+  min-height: 80px;
+}
+
+.patient-status__primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.patient-status__room,
+.patient-status__confidence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.patient-status__room-label,
+.patient-status__confidence-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #5c6470;
+}
+
+.patient-status__room-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0A2540;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.patient-status.status-alert .patient-status__room-value {
+  color: #B00020;
+}
+
+.patient-status__confidence-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1F4E79;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
 .alert-banner {
   background: #B00020;
   color: #fff;
   padding: 4px 8px;
-  margin-bottom: 6px;
+  margin: 0 8px 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -325,12 +412,45 @@
   opacity: 0.9;
 }
 
+.patient-status__secondary {
+  padding: 6px 12px 10px;
+}
+
+.patient-status__secondary .anomaly {
+  font-size: 10px;
+  font-weight: 600;
+  color: #B00020;
+}
+
 .status-details {
   margin: 0;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 12px;
   font-size: 10px;
+}
+
+.status-details--compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.status-details--compact dt,
+.status-details--compact dd {
+  display: inline;
+}
+
+.status-details--compact dt {
+  margin: 0;
+}
+
+.status-details--compact dt::after {
+  content: ': ';
+}
+
+.status-details--compact dd {
+  margin: 0 12px 0 0;
 }
 
 .status-details dt {

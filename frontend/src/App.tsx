@@ -7,6 +7,7 @@ import BreathingRatePage from './pages/BreathingRatePage';
 import OccupancyStatusPage from './pages/OccupancyStatusPage';
 import EventLogPage from './pages/EventLogPage';
 import SystemPage from './pages/SystemPage';
+import SettingsPage from './pages/SettingsPage';
 import './App.css';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="occupancy-status" element={<OccupancyStatusPage />} />
           <Route path="event-log" element={<EventLogPage />} />
           <Route path="system" element={<SystemPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

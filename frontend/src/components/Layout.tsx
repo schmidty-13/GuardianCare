@@ -1,39 +1,35 @@
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { NavLink } from 'react-router-dom';
+import Sidebar from './Sidebar';
 
-const NAV = [
-  { to: '/', label: 'Home' },
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/csi', label: 'CSI' },
-  { to: '/breathing-rate', label: 'Breathing' },
-  { to: '/occupancy-status', label: 'Occupancy' },
-  { to: '/event-log', label: 'Event log' },
-  { to: '/system', label: 'System' },
-];
+function useSidebarStatus() {
+  const [uptime, setUptime] = useState('0h 00m');
+  useEffect(() => {
+    const start = Date.now();
+    const t = setInterval(() => {
+      const d = Date.now() - start;
+      const h = Math.floor(d / 3600000);
+      const m = Math.floor((d % 3600000) / 60000);
+      setUptime(`${h}h ${String(m).padStart(2, '0')}m`);
+    }, 60000);
+    return () => clearInterval(t);
+  }, []);
+  return { uptime, online: true };
+}
 
 export default function Layout() {
+  const { uptime, online } = useSidebarStatus();
+
   return (
-    <div className="app">
-      <header className="app-header app-header-nav">
-        <div className="app-header-top">
-          <NavLink to="/" className="app-title-link">
-            <h1 className="app-title">Invisible Guardian</h1>
-          </NavLink>
-          <nav className="app-nav">
-            {NAV.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) => `app-nav-link${isActive ? ' app-nav-link--active' : ''}`}
-                end={to === '/'}
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-      </header>
-      <Outlet />
+    <div className="app-with-sidebar">
+      <Sidebar
+        modelVersion="v0.3.1"
+        uptime={uptime}
+        online={online}
+      />
+      <main className="app-main-wrap">
+        <Outlet />
+      </main>
     </div>
   );
 }

@@ -66,16 +66,14 @@ export default function DashboardPage() {
 
   const csiAmplitudes = lastMessage?.csiAmplitudes?.length === 52 ? lastMessage.csiAmplitudes : DEFAULT_CSI;
   const confidence = lastMessage?.confidence ?? 0;
-  const breathingBpm = lastMessage?.breathingBpm ?? null;
   const alertSentAt = lastMessage?.alertSentAt ?? null;
-  const breathingBaselineWindowMin = lastMessage?.breathingBaselineWindowMin ?? 10;
 
   const systemMeta: SystemMeta = {
     packetRate: lastMessage?.packetRate ?? null,
     rssi: lastMessage?.rssi ?? null,
     modelVersion: lastMessage?.modelVersion ?? null,
     detectionLatencyMs: lastMessage?.detectionLatencyMs ?? null,
-    breathingBaselineWindowMin,
+    breathingBaselineWindowMin: 10,
     uptimeMs: Date.now() - startTimeRef.current,
   };
 
@@ -94,22 +92,21 @@ export default function DashboardPage() {
       </header>
 
       <main className="dashboard">
+        <div className="dashboard-top">
+            <PatientStatusCard
+              status={status}
+              roomState={roomState}
+              confidence={confidence}
+              alertSentAt={alertSentAt}
+              breathingAnomaly={breathingAnomaly}
+            />
+        </div>
         <div className="dashboard-main">
           <div className="dashboard-left">
             <CSIHeatmap amplitudes={csiAmplitudes} />
           </div>
           <div className="dashboard-right">
             <BreathingRateChart history={bpmHistory} />
-            <PatientStatusCard
-              status={status}
-              roomState={roomState}
-              confidence={confidence}
-              breathingBpm={breathingBpm}
-              alertSentAt={alertSentAt}
-              breathingAnomaly={breathingAnomaly}
-              detectionLatencyMs={lastMessage?.detectionLatencyMs ?? null}
-              breathingBaselineWindowMin={breathingBaselineWindowMin}
-            />
           </div>
         </div>
         <div className="dashboard-bottom">
