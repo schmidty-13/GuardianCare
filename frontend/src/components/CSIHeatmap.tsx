@@ -2,21 +2,21 @@ const SUBCARRIERS = 52;
 const ROWS = 4;
 const COLS = 13; // 52 subcarriers
 
+/** Clinical palette: neutral gray to clinical blue (#1F4E79), no gradient in component */
 function amplitudeToHex(amp: number, min: number, max: number): string {
-  if (max <= min) return '#e8f0fe';
+  if (max <= min) return '#E5E9F0';
   const t = (amp - min) / (max - min);
-  const r = Math.round(30 + (1 - t) * 198);
-  const g = Math.round(100 + (1 - t) * 120);
-  const b = Math.round(230 + (1 - t) * 25);
+  const r = Math.round(229 + t * (31 - 229));
+  const g = Math.round(233 + t * (78 - 233));
+  const b = Math.round(240 + t * (121 - 240));
   return `rgb(${r},${g},${b})`;
 }
 
 interface CSIHeatmapProps {
   amplitudes: number[];
-  title?: string;
 }
 
-export function CSIHeatmap({ amplitudes, title = 'CSI amplitude (52 subcarriers)' }: CSIHeatmapProps) {
+export function CSIHeatmap({ amplitudes }: CSIHeatmapProps) {
   const hasData = amplitudes.length === SUBCARRIERS;
   const displayMin = hasData ? Math.min(...amplitudes) : 0;
   const displayMax = hasData ? Math.max(...amplitudes) : 0;
@@ -24,7 +24,7 @@ export function CSIHeatmap({ amplitudes, title = 'CSI amplitude (52 subcarriers)
   return (
     <section className="panel csi-heatmap">
       <header className="panel-header">
-        <h2 className="panel-title">{title}</h2>
+        <h2 className="panel-title">CSI AMPLITUDE (52 SUBCARRIERS)</h2>
         {hasData && (
           <span className="panel-meta">
             Range: {displayMin.toFixed(1)} – {displayMax.toFixed(1)}
@@ -56,7 +56,7 @@ export function CSIHeatmap({ amplitudes, title = 'CSI amplitude (52 subcarriers)
         </div>
         <div className="heatmap-legend">
           <span>Low</span>
-          <div className="heatmap-legend-bar" />
+          <div className="heatmap-legend-bar"><span className="heatmap-legend-fill" /></div>
           <span>High</span>
         </div>
       </div>

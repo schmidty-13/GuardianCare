@@ -21,9 +21,7 @@ interface DataPoint {
 }
 
 interface BreathingRateChartProps {
-  /** Recent BPM readings, newest last */
   history: { bpm: number; timestamp: number }[];
-  title?: string;
 }
 
 function formatTime(ms: number): string {
@@ -31,7 +29,7 @@ function formatTime(ms: number): string {
   return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-export function BreathingRateChart({ history, title = 'Breathing rate (BPM)' }: BreathingRateChartProps) {
+export function BreathingRateChart({ history }: BreathingRateChartProps) {
   const data: DataPoint[] = useMemo(() => {
     const slice = history.slice(-MAX_POINTS);
     return slice.map((h, i) => ({
@@ -44,39 +42,39 @@ export function BreathingRateChart({ history, title = 'Breathing rate (BPM)' }: 
   return (
     <section className="panel breathing-chart">
       <header className="panel-header">
-        <h2 className="panel-title">{title}</h2>
+        <h2 className="panel-title">BREATHING RATE (BPM)</h2>
         <span className="panel-meta">
-          Normal range: {NORMAL_BPM_MIN}–{NORMAL_BPM_MAX} BPM
+          {NORMAL_BPM_MIN}–{NORMAL_BPM_MAX} BPM normal
         </span>
       </header>
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={data} margin={{ top: 8, right: 12, left: 8, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E9F0" />
             <XAxis
               dataKey="time"
-              tick={{ fontSize: 11, fill: '#555' }}
+              tick={{ fontSize: 10, fill: '#0A2540' }}
               interval="preserveStartEnd"
               tickFormatter={(t) => t.slice(-8)}
             />
             <YAxis
               domain={['auto', 'auto']}
-              tick={{ fontSize: 11, fill: '#555' }}
-              width={32}
+              tick={{ fontSize: 10, fill: '#0A2540' }}
+              width={28}
               tickFormatter={(v) => String(v)}
             />
             <Tooltip
-              contentStyle={{ fontSize: 12, border: '1px solid #ddd' }}
+              contentStyle={{ fontSize: 11, border: '1px solid #E5E9F0', background: '#fff' }}
               labelFormatter={(label, payload) => (payload?.[0]?.payload?.time ?? label) as string}
               formatter={(value) => [`${value != null ? value : '—'} BPM`, 'Breathing rate']}
             />
-            <ReferenceLine y={NORMAL_BPM_MIN} stroke="#81c784" strokeDasharray="2 2" />
-            <ReferenceLine y={NORMAL_BPM_MAX} stroke="#81c784" strokeDasharray="2 2" />
+            <ReferenceLine y={NORMAL_BPM_MIN} stroke="#1F4E79" strokeDasharray="2 2" strokeOpacity={0.5} />
+            <ReferenceLine y={NORMAL_BPM_MAX} stroke="#1F4E79" strokeDasharray="2 2" strokeOpacity={0.5} />
             <Line
               type="monotone"
               dataKey="bpm"
-              stroke="#1976d2"
-              strokeWidth={2}
+              stroke="#1F4E79"
+              strokeWidth={1.5}
               dot={false}
               isAnimationActive={false}
               name="BPM"

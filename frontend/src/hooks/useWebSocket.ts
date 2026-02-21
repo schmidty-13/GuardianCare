@@ -9,6 +9,7 @@ const WS_URL = (() => {
 })();
 
 const DEMO_UPDATE_MS = 150;
+const MODEL_VERSION = '1.0.0';
 
 function useWebSocket(useDemoData: boolean) {
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
@@ -37,6 +38,11 @@ function useWebSocket(useDemoData: boolean) {
           breathingBpm: Math.round(baseBpm + (Math.random() - 0.5) * 2),
           csiAmplitudes,
           breathingAnomaly: false,
+          packetRate: 95 + Math.floor(Math.random() * 10),
+          rssi: -52 - Math.floor(Math.random() * 12),
+          modelVersion: MODEL_VERSION,
+          detectionLatencyMs: 80 + Math.floor(Math.random() * 40),
+          breathingBaselineWindowMin: 10,
         });
       }, DEMO_UPDATE_MS);
       return;
