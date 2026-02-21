@@ -25,6 +25,8 @@ export interface WebSocketMessage {
   detectionLatencyMs?: number | null;
   /** Breathing baseline window in minutes */
   breathingBaselineWindowMin?: number | null;
+  /** Frames processed (inference server) */
+  frameCount?: number | null;
 }
 
 export interface SystemMeta {
@@ -34,6 +36,7 @@ export interface SystemMeta {
   detectionLatencyMs: number | null;
   breathingBaselineWindowMin: number;
   uptimeMs: number;
+  frameCount: number | null;
 }
 
 export interface LogEvent {

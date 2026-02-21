@@ -6,6 +6,7 @@ interface PatientStatusCardProps {
   confidence: number;
   alertSentAt: number | null;
   breathingAnomaly?: boolean;
+  onResetAlert?: () => void;
 }
 
 const ROOM_LABELS: Record<RoomState, string> = {
@@ -33,6 +34,7 @@ export function PatientStatusCard({
   confidence,
   alertSentAt,
   breathingAnomaly = false,
+  onResetAlert,
 }: PatientStatusCardProps) {
   const isAlert = status === 'alert';
   const alertTime = alertSentAt ? new Date(alertSentAt).toLocaleTimeString('en-US', { hour12: false }) : null;
@@ -61,6 +63,11 @@ export function PatientStatusCard({
         <div className="alert-banner">
           <span className="alert-text">NURSE ALERT SENT</span>
           {alertTime && <span className="alert-time">{alertTime}</span>}
+          {onResetAlert && (
+            <button type="button" className="alert-reset-btn" onClick={onResetAlert}>
+              Reset Alert
+            </button>
+          )}
         </div>
       )}
       {breathingAnomaly && (

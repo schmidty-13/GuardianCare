@@ -10,6 +10,10 @@ export function SystemMetaBar({ meta, connected, demoMode }: SystemMetaBarProps)
   return (
     <div className="system-meta-bar">
       <span className="system-meta-item">
+        <span className="system-meta-label">FRAMES</span>
+        <span className="system-meta-value">{meta.frameCount != null ? meta.frameCount.toLocaleString() : '—'}</span>
+      </span>
+      <span className="system-meta-item">
         <span className="system-meta-label">PACKET RATE</span>
         <span className="system-meta-value">{meta.packetRate != null ? `${meta.packetRate} p/s` : '—'}</span>
       </span>

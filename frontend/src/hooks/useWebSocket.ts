@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { WebSocketMessage } from '../types';
 
-const WS_URL = (() => {
+const INFERENCE_WS_URL = 'ws://localhost:8000/ws';
+
+const FALLBACK_WS_URL = (() => {
   const base = typeof window !== 'undefined' ? window.location : { host: 'localhost', protocol: 'ws:' };
   const host = (import.meta as { env?: { VITE_WS_HOST?: string } }).env?.VITE_WS_HOST;
   if (host) return host;
@@ -11,12 +13,47 @@ const WS_URL = (() => {
 const DEMO_UPDATE_MS = 150;
 const MODEL_VERSION = '1.0.0';
 
+type InferencePrediction = 'Empty' | 'Present' | 'Fallen';
+
+interface InferenceMessage {
+  prediction: InferencePrediction;
+  confidence: number;
+  alert_active: boolean;
+  alert_time: string | null;
+  frame_count: number;
+  raw_amplitudes: number[];
+}
+
+function inferenceToMessage(data: InferenceMessage, alertSentAt: number | null): WebSocketMessage {
+  const roomState =
+    data.prediction === 'Empty' ? 'empty_room' : data.prediction === 'Present' ? 'person_present' : 'person_fallen';
+  const raw = data.raw_amplitudes ?? [];
+  const csiAmplitudes = raw.length >= 52 ? raw.slice(0, 52) : [...raw, ...Array(52 - raw.length).fill(0)];
+  return {
+    type: 'update',
+    roomState,
+    confidence: (data.confidence ?? 0) / 100,
+    breathingBpm: null,
+    csiAmplitudes,
+    alertSentAt,
+    breathingAnomaly: false,
+    packetRate: null,
+    rssi: null,
+    modelVersion: null,
+    detectionLatencyMs: null,
+    breathingBaselineWindowMin: 10,
+    frameCount: data.frame_count ?? null,
+  };
+}
+
 function useWebSocket(useDemoData: boolean) {
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const demoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertSentAtRef = useRef<number | null>(null);
 
   const connect = useCallback(() => {
     if (useDemoData) {
@@ -43,27 +80,41 @@ function useWebSocket(useDemoData: boolean) {
           modelVersion: MODEL_VERSION,
           detectionLatencyMs: 80 + Math.floor(Math.random() * 40),
           breathingBaselineWindowMin: 10,
+          frameCount: null,
         });
       }, DEMO_UPDATE_MS);
       return;
     }
-    const ws = new WebSocket(WS_URL);
+    const url = INFERENCE_WS_URL;
+    const ws = new WebSocket(url);
     wsRef.current = ws;
     ws.onopen = () => {
       setConnected(true);
       setError(null);
     };
-    ws.onclose = () => setConnected(false);
+    ws.onclose = () => {
+      setConnected(false);
+      reconnectTimeoutRef.current = setTimeout(() => connect(), 2000);
+    };
     ws.onerror = () => setError('Connection error');
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data as string) as WebSocketMessage;
-        if (data.type === 'update') setLastMessage(data);
+        const data = JSON.parse(event.data as string) as InferenceMessage;
+        if (data.alert_active) {
+          if (alertSentAtRef.current == null) alertSentAtRef.current = Date.now();
+        } else {
+          alertSentAtRef.current = null;
+        }
+        setLastMessage(inferenceToMessage(data, alertSentAtRef.current));
       } catch {
         setError('Invalid message');
       }
     };
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
       ws.close();
       wsRef.current = null;
     };
@@ -83,4 +134,4 @@ function useWebSocket(useDemoData: boolean) {
   return { lastMessage, connected, error };
 }
 
-export { useWebSocket, WS_URL };
+export { useWebSocket, INFERENCE_WS_URL, FALLBACK_WS_URL as WS_URL };

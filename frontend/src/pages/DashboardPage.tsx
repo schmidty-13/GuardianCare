@@ -75,7 +75,16 @@ export default function DashboardPage() {
     detectionLatencyMs: lastMessage?.detectionLatencyMs ?? null,
     breathingBaselineWindowMin: 10,
     uptimeMs: Date.now() - startTimeRef.current,
+    frameCount: lastMessage?.frameCount ?? null,
   };
+
+  const resetAlert = useCallback(async () => {
+    try {
+      await fetch('http://localhost:8000/reset_alert', { method: 'POST' });
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="app-dashboard">
@@ -99,6 +108,7 @@ export default function DashboardPage() {
               confidence={confidence}
               alertSentAt={alertSentAt}
               breathingAnomaly={breathingAnomaly}
+              onResetAlert={demoMode ? undefined : resetAlert}
             />
         </div>
         <div className="dashboard-main">
