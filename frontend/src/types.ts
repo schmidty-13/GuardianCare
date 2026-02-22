@@ -1,6 +1,6 @@
-export type RoomState = 'empty_room' | 'person_present' | 'person_fallen';
+export type RoomState = 'empty_room' | 'person_present' | 'person_fallen' | 'no_hardware' | 'waiting';
 
-export type PatientStatus = 'clear' | 'monitoring' | 'alert';
+export type PatientStatus = 'clear' | 'monitoring' | 'alert' | 'offline';
 
 export interface CSIAmplitudeFrame {
   amplitudes: number[];

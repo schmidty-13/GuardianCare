@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { WebSocketMessage } from '../types';
 
-const INFERENCE_WS_URL = 'ws://localhost:8000/ws';
+const WS_URL = (import.meta as { env?: { VITE_WS_HOST?: string } }).env?.VITE_WS_HOST ?? 'ws://localhost:8000/ws';
 
-const FALLBACK_WS_URL = (() => {
-  const base = typeof window !== 'undefined' ? window.location : { host: 'localhost', protocol: 'ws:' };
-  const host = (import.meta as { env?: { VITE_WS_HOST?: string } }).env?.VITE_WS_HOST;
-  if (host) return host;
-  return `${(base as { protocol: string }).protocol === 'https:' ? 'wss:' : 'ws:'}//${(base as { host: string }).host}/ws`;
+const API_BASE_URL = (() => {
+  const wsUrl = WS_URL;
+  try {
+    const u = new URL(wsUrl);
+    u.protocol = u.protocol === 'wss:' ? 'https:' : 'http:';
+    const path = u.pathname.replace(/\/ws\/?$/, '');
+    return `${u.protocol}//${u.host}${path}`;
+  } catch {
+    return 'http://localhost:8000';
+  }
 })();
 
 const DEMO_UPDATE_MS = 150;
 const MODEL_VERSION = '1.0.0';
 
-type InferencePrediction = 'Empty' | 'Present' | 'Fallen';
+type InferencePrediction = 'Empty' | 'Present' | 'Fallen' | 'No Hardware' | 'Waiting';
 
 interface InferenceMessage {
   prediction: InferencePrediction;
@@ -24,15 +29,22 @@ interface InferenceMessage {
   raw_amplitudes: number[];
 }
 
+const PREDICTION_TO_ROOM: Record<string, WebSocketMessage['roomState']> = {
+  Empty: 'empty_room',
+  Present: 'person_present',
+  Fallen: 'person_fallen',
+  'No Hardware': 'no_hardware',
+  Waiting: 'waiting',
+};
+
 function inferenceToMessage(data: InferenceMessage, alertSentAt: number | null): WebSocketMessage {
-  const roomState =
-    data.prediction === 'Empty' ? 'empty_room' : data.prediction === 'Present' ? 'person_present' : 'person_fallen';
+  const roomState = PREDICTION_TO_ROOM[data.prediction] ?? 'waiting';
   const raw = data.raw_amplitudes ?? [];
   const csiAmplitudes = raw.length >= 52 ? raw.slice(0, 52) : [...raw, ...Array(52 - raw.length).fill(0)];
   return {
     type: 'update',
     roomState,
-    confidence: (data.confidence ?? 0) / 100,
+    confidence: data.confidence ?? 0,
     breathingBpm: null,
     csiAmplitudes,
     alertSentAt,
@@ -85,8 +97,7 @@ function useWebSocket(useDemoData: boolean) {
       }, DEMO_UPDATE_MS);
       return;
     }
-    const url = INFERENCE_WS_URL;
-    const ws = new WebSocket(url);
+    const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
     ws.onopen = () => {
       setConnected(true);
@@ -134,4 +145,4 @@ function useWebSocket(useDemoData: boolean) {
   return { lastMessage, connected, error };
 }
 
-export { useWebSocket, INFERENCE_WS_URL, FALLBACK_WS_URL as WS_URL };
+export { useWebSocket, WS_URL, API_BASE_URL };

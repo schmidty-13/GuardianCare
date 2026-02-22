@@ -13,6 +13,8 @@ const ROOM_LABELS: Record<RoomState, string> = {
   empty_room: 'Room empty',
   person_present: 'Person present',
   person_fallen: 'Fall detected',
+  no_hardware: 'No hardware',
+  waiting: 'Waiting for data',
 };
 
 function statusLabel(s: PatientStatus): string {
@@ -23,6 +25,8 @@ function statusLabel(s: PatientStatus): string {
       return 'MONITORING';
     case 'alert':
       return 'ALERT';
+    case 'offline':
+      return 'OFFLINE';
     default:
       return '—';
   }

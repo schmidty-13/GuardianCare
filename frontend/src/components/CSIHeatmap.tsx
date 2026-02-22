@@ -2,13 +2,13 @@ const SUBCARRIERS = 52;
 const ROWS = 4;
 const COLS = 13; // 52 subcarriers
 
-/** Clinical palette: neutral gray to clinical blue (#1F4E79), no gradient in component */
-function amplitudeToHex(amp: number, min: number, max: number): string {
-  if (max <= min) return '#E5E9F0';
-  const t = (amp - min) / (max - min);
-  const r = Math.round(229 + t * (31 - 229));
-  const g = Math.round(233 + t * (78 - 233));
-  const b = Math.round(240 + t * (121 - 240));
+/** Teal-to-navy gradient for better perceptual contrast */
+function amplitudeToColor(amp: number, min: number, max: number): string {
+  if (max <= min) return '#d1ecf9';
+  const t = Math.max(0, Math.min(1, (amp - min) / (max - min)));
+  const r = Math.round(209 + t * (10 - 209));
+  const g = Math.round(236 + t * (37 - 236));
+  const b = Math.round(249 + t * (64 - 249));
   return `rgb(${r},${g},${b})`;
 }
 
@@ -42,7 +42,7 @@ export function CSIHeatmap({ amplitudes }: CSIHeatmapProps) {
               const i = r * COLS + c;
               if (i >= SUBCARRIERS) return null;
               const val = amplitudes[i] ?? 0;
-              const color = amplitudeToHex(val, displayMin, displayMax || 1);
+              const color = amplitudeToColor(val, displayMin, displayMax || 1);
               return (
                 <div
                   key={`${r}-${c}`}

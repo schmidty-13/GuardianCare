@@ -25,7 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # ──────────────────────────────────────────────────────────────────────────────
 # CONFIG
 # ──────────────────────────────────────────────────────────────────────────────
-SERIAL_PORT       = "COM3"
+SERIAL_PORT       = "/dev/tty.usbserial-0001"
 BAUD_RATE         = 921600
 MODEL_PATH        = "invisible_guardian_model.pth"
 WINDOW_SIZE       = 500

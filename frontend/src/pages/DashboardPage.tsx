@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useWebSocket, API_BASE_URL } from '../hooks/useWebSocket';
 import { CSIHeatmap } from '../components/CSIHeatmap';
+import { CSIAmplitudeChart } from '../components/CSIAmplitudeChart';
 import { BreathingRateChart } from '../components/BreathingRateChart';
 import { PatientStatusCard } from '../components/PatientStatusCard';
 import { SystemMetaBar } from '../components/SystemMetaBar';
@@ -8,8 +9,10 @@ import { EventLog } from '../components/EventLog';
 import type { PatientStatus, SystemMeta, LogEvent } from '../types';
 
 const DEFAULT_CSI = Array.from({ length: 52 }, () => 25 + Math.random() * 15);
+const CSI_HISTORY_SIZE = 120;
 
 function deriveStatus(roomState: string, breathingAnomaly: boolean): PatientStatus {
+  if (roomState === 'no_hardware' || roomState === 'waiting') return 'offline';
   if (roomState === 'person_fallen') return 'alert';
   if (roomState === 'person_present' || breathingAnomaly) return 'monitoring';
   return 'clear';
@@ -25,6 +28,8 @@ export default function DashboardPage() {
   const { lastMessage, connected, error } = useWebSocket(demoMode);
   const bpmHistoryRef = useRef<{ bpm: number; timestamp: number }[]>([]);
   const [bpmHistory, setBpmHistory] = useState<{ bpm: number; timestamp: number }[]>([]);
+  const csiHistoryRef = useRef<{ timestamp: number; amplitudes: number[] }[]>([]);
+  const [csiHistory, setCsiHistory] = useState<{ timestamp: number; amplitudes: number[] }[]>([]);
   const [events, setEvents] = useState<LogEvent[]>([]);
   const startTimeRef = useRef<number>(Date.now());
   const prevStatusRef = useRef<PatientStatus | null>(null);
@@ -43,6 +48,13 @@ export default function DashboardPage() {
       setBpmHistory(bpmHistoryRef.current);
     }
   }, [lastMessage?.breathingBpm, lastMessage?.alertSentAt, lastMessage?.type]);
+
+  useEffect(() => {
+    if (!lastMessage?.csiAmplitudes?.length) return;
+    const entry = { timestamp: Date.now(), amplitudes: lastMessage.csiAmplitudes };
+    csiHistoryRef.current = [...csiHistoryRef.current.slice(-(CSI_HISTORY_SIZE - 1)), entry];
+    setCsiHistory(csiHistoryRef.current);
+  }, [lastMessage?.csiAmplitudes]);
 
   const roomState = lastMessage?.roomState ?? 'empty_room';
   const breathingAnomaly = lastMessage?.breathingAnomaly ?? false;
@@ -80,7 +92,7 @@ export default function DashboardPage() {
 
   const resetAlert = useCallback(async () => {
     try {
-      await fetch('http://localhost:8000/reset_alert', { method: 'POST' });
+      await fetch(`${API_BASE_URL}/reset_alert`, { method: 'POST' });
     } catch {
       // ignore
     }
@@ -113,14 +125,13 @@ export default function DashboardPage() {
         </div>
         <div className="dashboard-main">
           <div className="dashboard-left">
+            <CSIAmplitudeChart history={csiHistory} />
             <CSIHeatmap amplitudes={csiAmplitudes} />
           </div>
           <div className="dashboard-right">
             <BreathingRateChart history={bpmHistory} />
+            <EventLog events={events} />
           </div>
-        </div>
-        <div className="dashboard-bottom">
-          <EventLog events={events} />
         </div>
       </main>
     </div>
