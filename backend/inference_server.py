@@ -21,6 +21,7 @@ import serial
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 SERIAL_PORT       = "/dev/tty.usbserial-0001"
 BAUD_RATE         = 921600
@@ -30,10 +31,10 @@ STEP              = 50
 ALERT_CONSECUTIVE = 3
 
 TWILIO_ENABLED = True
-TWILIO_SID     = ""
-TWILIO_AUTH    = ""
-TWILIO_FROM    = ""
-TWILIO_TO      = ""
+TWILIO_SID     = os.getenv("TWILIO_SID")
+TWILIO_AUTH    = os.getenv("TWILIO_AUTH")
+TWILIO_FROM    = os.getenv("TWILIO_FROM")
+TWILIO_TO      = os.getenv("TWILIO_TO")
 
 CLASS_LABELS = {0: "Empty", 1: "Present", 2: "Fallen"}
 
