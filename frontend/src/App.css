@@ -1,13 +1,6 @@
-/* ═══════════════════════════════════════════════════════════════════
-   Invisible Guardian — Dashboard Styles
-   Clinical palette: navy #0A2540, blue #1F4E79, gray #E5E9F0, alert #B00020
-   ═══════════════════════════════════════════════════════════════════ */
-
 :root {
   --sidebar-width: 240px;
 }
-
-/* ── Shell layout ────────────────────────────────────────────────── */
 
 .app-with-sidebar {
   min-height: 100vh;
@@ -26,8 +19,6 @@
   flex-direction: column;
   background: #f0f2f5;
 }
-
-/* ── Header ──────────────────────────────────────────────────────── */
 
 .app-header {
   background: var(--color-navy, #0A2540);
@@ -106,8 +97,6 @@
   margin-top: 4px;
 }
 
-/* ── System meta bar ─────────────────────────────────────────────── */
-
 .system-meta-bar {
   display: flex;
   flex-wrap: wrap;
@@ -141,8 +130,6 @@
 .system-meta-link.disconnected {
   color: #ef5350;
 }
-
-/* ── Dashboard grid ──────────────────────────────────────────────── */
 
 .app-dashboard {
   flex: 1;
@@ -203,8 +190,6 @@
   }
 }
 
-/* ── Panel (shared card) ─────────────────────────────────────────── */
-
 .panel {
   background: var(--panel-bg, #fff);
   border: 1px solid var(--panel-border, #d1d5db);
@@ -238,8 +223,6 @@
   font-size: 10px;
   color: var(--color-muted, #5c6470);
 }
-
-/* ── CSI heatmap ─────────────────────────────────────────────────── */
 
 .csi-heatmap {
   min-height: 180px;
@@ -295,8 +278,6 @@
   display: none;
 }
 
-/* ── CSI amplitude chart ─────────────────────────────────────────── */
-
 .csi-amplitude-chart {
   min-height: 0;
 }
@@ -307,7 +288,6 @@
   min-height: 200px;
 }
 
-/* ── Breathing chart ─────────────────────────────────────────────── */
 
 .breathing-chart {
   flex: 1;
@@ -319,8 +299,6 @@
   flex: 1;
   min-height: 200px;
 }
-
-/* ── Patient status card ─────────────────────────────────────────── */
 
 .patient-status .panel-title {
   font-size: 11px;
@@ -486,8 +464,6 @@
   color: var(--color-alert, #B00020);
 }
 
-/* ── Status details (compact) ────────────────────────────────────── */
-
 .status-details {
   margin: 0;
   display: grid;
@@ -532,8 +508,6 @@
 .status-details dd.anomaly {
   color: var(--color-alert, #B00020);
 }
-
-/* ── Event log ───────────────────────────────────────────────────── */
 
 .event-log {
   display: flex;
@@ -588,8 +562,6 @@
 .event-log-row--warn .event-log-message {
   color: var(--color-blue, #1F4E79);
 }
-
-/* ── Content pages (Home + info pages) ───────────────────────────── */
 
 .page {
   flex: 1;
