@@ -32,7 +32,7 @@ WINDOW_SIZE       = 500
 STEP              = 50
 ALERT_CONSECUTIVE = 3
 
-TWILIO_ENABLED = False
+TWILIO_ENABLED = True
 TWILIO_SID     = ""
 TWILIO_AUTH    = ""
 TWILIO_FROM    = ""
