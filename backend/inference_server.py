@@ -22,9 +22,6 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CONFIG
-# ──────────────────────────────────────────────────────────────────────────────
 SERIAL_PORT       = "/dev/tty.usbserial-0001"
 BAUD_RATE         = 921600
 MODEL_PATH        = "invisible_guardian_model.pth"
@@ -40,10 +37,6 @@ TWILIO_TO      = ""
 
 CLASS_LABELS = {0: "Empty", 1: "Present", 2: "Fallen"}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CNN MODEL — exact copy of train_cnn.py architecture (Sequential blocks)
-# Layer names and structure must match saved checkpoint exactly
-# ──────────────────────────────────────────────────────────────────────────────
 class CSIFallDetectionCNN(nn.Module):
     def __init__(self, n_subcarriers: int = 192, window_size: int = 500):
         super().__init__()
@@ -68,7 +61,6 @@ class CSIFallDetectionCNN(nn.Module):
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(64, 3)
-            # No softmax here — raw logits output, softmax applied at inference time
         )
 
     def forward(self, x):
@@ -76,10 +68,6 @@ class CSIFallDetectionCNN(nn.Module):
         x = self.fc_block(x)
         return x
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# SHARED STATE
-# ──────────────────────────────────────────────────────────────────────────────
 state_lock = threading.Lock()
 shared_state = {
     "prediction":        "Waiting",
@@ -92,10 +80,6 @@ shared_state = {
     "raw_amplitudes":    [],
 }
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# HELPERS
-# ──────────────────────────────────────────────────────────────────────────────
 def load_model(path: str):
     print(f"[MODEL] Loading checkpoint from {path} ...")
     checkpoint = torch.load(path, map_location="cpu", weights_only=False)
@@ -150,10 +134,6 @@ def send_twilio_sms(message: str):
     except Exception as e:
         print(f"[TWILIO] Failed: {e}")
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# INFERENCE THREAD
-# ──────────────────────────────────────────────────────────────────────────────
 def inference_thread(model, n_sub: int, win: int):
     buffer               = deque(maxlen=win)
     frames_since_infer   = 0
@@ -188,7 +168,6 @@ def inference_thread(model, n_sub: int, win: int):
         if amplitudes is None:
             continue
 
-        # Pad if needed
         if len(amplitudes) < n_sub:
             amplitudes = np.pad(amplitudes, (0, n_sub - len(amplitudes)))
 
@@ -203,13 +182,11 @@ def inference_thread(model, n_sub: int, win: int):
         if fc % 100 == 0:
             print(f"[DATA] Frames: {fc}  Buffer: {len(buffer)}/{win}")
 
-        # Run inference every STEP frames once buffer is full
         if len(buffer) < win or frames_since_infer < STEP:
             continue
 
         frames_since_infer = 0
 
-        # Shape: (n_sub, win)
         window = np.stack(list(buffer), axis=1)
 
         try:
@@ -219,11 +196,10 @@ def inference_thread(model, n_sub: int, win: int):
 
         window = normalize(window)
 
-        # Tensor shape: (1, n_sub, win)
         tensor = torch.from_numpy(window).unsqueeze(0)
 
         with torch.no_grad():
-            logits = model(tensor)                                   # (1, 3)
+            logits = model(tensor)                                   
             probs  = torch.softmax(logits, dim=1).squeeze(0).numpy()
             pred_id    = int(np.argmax(probs))
             confidence = float(probs[pred_id])
@@ -259,10 +235,6 @@ def inference_thread(model, n_sub: int, win: int):
                     daemon=True,
                 ).start()
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# FASTAPI
-# ──────────────────────────────────────────────────────────────────────────────
 app = FastAPI(title="Invisible Guardian")
 app.add_middleware(
     CORSMiddleware,
@@ -306,10 +278,6 @@ async def websocket_endpoint(ws: WebSocket):
     except Exception as e:
         print(f"[WS] Error: {e}")
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# MAIN
-# ──────────────────────────────────────────────────────────────────────────────
 def main():
     print("=" * 60)
     print("  Invisible Guardian — CSI Fall Detection Server")
