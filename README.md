@@ -1,3 +1,11 @@
+## Team: AI'm Him
+
+**Dylan Pellegrini · Liam Schmidt · Paul Chen · Trevor Cluté**
+
+HackAI 2026
+
+---
+
 # GuardianCare
 ### Passive Wireless Fall Detection for Safer Independent Living
 
@@ -78,8 +86,3 @@ Falls are projected to cost the U.S. healthcare system over $101 billion by 2030
 
 ---
 
-## Team
-
-**Dylan Pellegrini · Liam Schmidt · Paul Chen · Trevor Cluté**
-
-HackAI 2026
